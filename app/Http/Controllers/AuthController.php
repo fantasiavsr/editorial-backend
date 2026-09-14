@@ -32,4 +32,29 @@ class AuthController extends Controller
             'token' => $user->createToken('web')->plainTextToken,
         ], 201);
     }
+
+    /**
+     * Login user with email and password, issue a personal access token.
+     */
+    public function login(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'email' => 'required|email|max:255',
+            'password' => 'required|string|min:8',
+        ]);
+
+        if (! \Illuminate\Support\Facades\Auth::attempt($validated)) {
+            return response()->json([
+                'message' => 'Invalid credentials',
+            ], 401);
+        }
+
+        $user = User::where('email', $validated['email'])->first();
+
+        return response()->json([
+            'message' => 'Login successful',
+            'user' => $user,
+            'token' => $user->createToken('web')->plainTextToken,
+        ], 201);
+    }
 }

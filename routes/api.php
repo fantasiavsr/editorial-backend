@@ -28,6 +28,7 @@ Route::get('/health', function () {
 
 // Authentication routes
 Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);
 
 // Products API resource routes
 Route::apiResource('products', ProductController::class);
