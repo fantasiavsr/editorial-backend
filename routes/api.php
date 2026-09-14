@@ -1,7 +1,9 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\PricingPlanController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ServiceController;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,3 +27,7 @@ Route::get('/health', function () {
 
 // Products API resource routes
 Route::apiResource('products', ProductController::class);
+
+// Read-only catalog endpoints for the dashboard
+Route::get('/services', [ServiceController::class, 'index']);
+Route::get('/pricing', [PricingPlanController::class, 'index']);
