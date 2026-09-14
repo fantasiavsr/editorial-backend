@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PricingPlanController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ServiceController;
@@ -24,6 +25,9 @@ Route::get('/health', function () {
         'service' => 'editorial-backend',
     ]);
 });
+
+// Authentication routes
+Route::post('/register', [AuthController::class, 'register']);
 
 // Products API resource routes
 Route::apiResource('products', ProductController::class);
