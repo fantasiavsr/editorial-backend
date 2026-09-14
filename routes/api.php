@@ -28,6 +28,6 @@ Route::get('/health', function () {
 // Products API resource routes
 Route::apiResource('products', ProductController::class);
 
-// Read-only catalog endpoints for the dashboard
-Route::get('/services', [ServiceController::class, 'index']);
-Route::get('/pricing', [PricingPlanController::class, 'index']);
+// Full CRUD API resource routes
+Route::apiResource('services', ServiceController::class);
+Route::apiResource('pricing', PricingPlanController::class);
