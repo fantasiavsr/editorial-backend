@@ -1,59 +1,123 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Editorial Backend
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Laravel 12 REST API for the Editorial Web frontend.
 
-## About Laravel
+## Local development with XAMPP MySQL
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Requirements:
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- PHP 8.2+
+- Composer
+- MySQL/MariaDB (XAMPP is supported)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Create a local `.env` file from `.env.example`, then use local values:
 
-## Learning Laravel
+```env
+APP_ENV=local
+APP_DEBUG=true
+APP_URL=http://localhost:8000
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=editorial_backend
+DB_USERNAME=root
+DB_PASSWORD=
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+FRONTEND_URL=http://localhost:5173
+```
 
-## Laravel Sponsors
+Create the database in phpMyAdmin or the XAMPP MySQL client, then run:
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+```bash
+composer install
+php artisan key:generate
+php artisan migrate
+php artisan db:seed
+php artisan serve --port=8000
+```
 
-### Premium Partners
+The API is available at `http://localhost:8000/api`.
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+## API endpoints
 
-## Contributing
+```text
+GET|POST              /api/products
+GET|PUT|PATCH|DELETE  /api/products/{product}
+GET|POST              /api/services
+GET|PUT|PATCH|DELETE  /api/services/{service}
+GET|POST              /api/pricing
+GET|PUT|PATCH|DELETE  /api/pricing/{pricing}
+GET                    /api/health
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Production deployment checklist
 
-## Code of Conduct
+Do not commit `.env`, passwords, or `APP_KEY`. Configure these values directly in the production server environment:
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```env
+APP_ENV=production
+APP_DEBUG=false
+APP_URL=https://api.example.com
+APP_KEY=generated-on-server
 
-## Security Vulnerabilities
+DB_CONNECTION=mysql
+DB_HOST=production-db-host
+DB_PORT=3306
+DB_DATABASE=editorial_backend_prod
+DB_USERNAME=editorial_backend
+DB_PASSWORD=strong-private-password
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+FRONTEND_URL=https://www.example.com
+LOG_LEVEL=error
+```
 
-## License
+Use a dedicated database user with only the permissions required by this application. Do not use MySQL `root` in production.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+The web server document root must point to Laravel's `public/` directory, not the repository root. Enable HTTPS before allowing browser traffic from the frontend. If uploaded public files are added later, run:
+
+```bash
+php artisan storage:link
+```
+
+After dependencies and environment values are configured on the server:
+
+```bash
+composer install --no-dev --optimize-autoloader
+php artisan migrate --force
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+```
+
+Never use `migrate:fresh` or destructive seed commands against a production database.
+
+## Same-domain and API-subdomain hosting
+
+Same-domain routing:
+
+```text
+https://www.example.com/       → React/Vercel or static frontend
+https://www.example.com/api/*   → reverse proxy to Laravel public/index.php
+```
+
+API subdomain routing:
+
+```text
+https://www.example.com/        → React frontend
+https://api.example.com/api/*   → Laravel public/index.php
+```
+
+The frontend `VITE_API_URL` must match the deployed API URL. The API server's `FRONTEND_URL` must match the browser origin. DNS alone does not create same-domain `/api` routing; configure the host's reverse proxy or rewrite rules explicitly.
+
+## CORS
+
+CORS is configured for `/api/*` using the `FRONTEND_URL` environment value. Credentials are disabled because authentication is not yet part of this project. Restrict `FRONTEND_URL` to the exact frontend origin; do not use `*` for a production API.
+
+## Verification
+
+```bash
+php artisan test
+php artisan route:list --path=api
+curl http://localhost:8000/api/health
+```
