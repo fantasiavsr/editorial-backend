@@ -3,10 +3,9 @@
 return [
     'paths' => ['api/*', 'up'],
     'allowed_methods' => ['*'],
-    'allowed_origins' => array_filter([
-        env('FRONTEND_URL'),
-        env('APP_URL'),
-    ]),
+    'allowed_origins' => env('APP_ENV') === 'production'
+        ? array_filter([env('FRONTEND_URL')])
+        : [],
     'allowed_origins_patterns' => [],
     'allowed_headers' => ['*'],
     'exposed_headers' => [],
