@@ -57,4 +57,26 @@ class AuthController extends Controller
             'token' => $user->createToken('web')->plainTextToken,
         ], 201);
     }
+
+    /**
+     * Get the authenticated user.
+     */
+    public function user(Request $request): JsonResponse
+    {
+        return response()->json([
+            'user' => $request->user(),
+        ]);
+    }
+
+    /**
+     * Logout the user by revoking the current access token.
+     */
+    public function logout(Request $request): JsonResponse
+    {
+        $request->user()->currentAccessToken()->delete();
+
+        return response()->json([
+            'message' => 'Logged out successfully',
+        ]);
+    }
 }
